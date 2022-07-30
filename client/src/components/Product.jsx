@@ -35,7 +35,9 @@ const Container = styled.div`
   }
 `;
 const Image = styled.img`
-  height: 75%;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 `;
 
 const Icon = styled.div`
