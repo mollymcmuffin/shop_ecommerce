@@ -6,7 +6,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Redirect,
+  Navigate,
 } from "react-router-dom";
 import ProductList from "./pages/ProductList";
 import Product from "./pages/Product";
@@ -30,7 +30,10 @@ function App() {
           <Route path=":id" element={<Product />} />
         </Route>
         <Route path="/cart" element={<Cart />}></Route>
-        <Route path="/login" element={<Login />}></Route>
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" /> : <Login />}
+        ></Route>
         <Route
           path="/register"
           element={user ? <Home /> : <Register />}
