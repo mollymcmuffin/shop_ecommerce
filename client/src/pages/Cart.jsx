@@ -1,8 +1,20 @@
-import { Add, Remove } from "@material-ui/icons";
+import {
+  Add,
+  Remove,
+  StayPrimaryLandscapeOutlined,
+  StayPrimaryPortraitRounded,
+} from "@material-ui/icons";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Annoucement from "../components/Annoucement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import StripeCheckout from "react-stripe-checkout";
+import { useEffect, useState } from "react";
+import { userRequest } from "../requestMethod";
+import { useNavigate } from "react-router-dom";
+
+const KEY = process.env.REACT_APP_STRIPE;
 
 const Container = styled.div``;
 const Wrapper = styled.div`
@@ -135,6 +147,26 @@ const Button = styled.button`
 `;
 
 const Cart = () => {
+  const cart = useSelector((state) => state.cart);
+  const [stripeToken, setStripeToken] = useState(null);
+  const navigate = useNavigate();
+
+  const onToken = (token) => {
+    setStripeToken(token);
+  };
+  useEffect(() => {
+    const makeRequest = async () => {
+      try {
+        const res = await userRequest.post("/checkout/payment", {
+          tokenId: stripeToken.id,
+          amount: cart.total * 100,
+        });
+        navigate("/success", { data: res.data });
+      } catch (error) {}
+    };
+    stripeToken && cart.total >= 1 && makeRequest();
+  }, [stripeToken, cart.total, navigate]);
+
   return (
     <Container>
       <Navbar />
@@ -151,63 +183,46 @@ const Cart = () => {
         </Top>
         <Bottom>
           <Info>
-            <Product>
-              <ProductDetail>
-                <Image src="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto/95acbf8f-b843-4a60-baf6-fbb4fcc6f48c/air-force-1-07-lv8-shoes-V6SkWv.png" />
-                <Details>
-                  <ProductName>
-                    <b>Product:</b>HALO SNEAKERS
-                  </ProductName>
-                  <ProductID>
-                    <b>ID:</b>98776554
-                  </ProductID>
-                  <ProductColor color="black" />
-                  <ProductSize>
-                    <b>Size:</b>EU42
-                  </ProductSize>
-                </Details>
-              </ProductDetail>
-              <PriceDetail>
-                <ProductAmountContainer>
-                  <Add />
-                  <ProductAmount>1</ProductAmount>
-                  <Remove />
-                </ProductAmountContainer>
-                <ProductPrice>$189</ProductPrice>
-              </PriceDetail>
-            </Product>
+            {cart.products.map((product) => (
+              <Product>
+                <ProductDetail>
+                  <Image src={product.img} />
+                  <Details>
+                    <ProductName>
+                      <b>Product:</b>
+                      {product.title}
+                    </ProductName>
+                    <ProductID>
+                      <b>ID:</b>
+                      {product._id}
+                    </ProductID>
+                    <ProductColor color={product.color} />
+                    <ProductSize>
+                      <b>Size:</b>
+                      {product.size}
+                    </ProductSize>
+                  </Details>
+                </ProductDetail>
+                <PriceDetail>
+                  <ProductAmountContainer>
+                    <Add />
+                    <ProductAmount>{product.quantity}</ProductAmount>
+                    <Remove />
+                  </ProductAmountContainer>
+                  <ProductPrice>
+                    ${product.price * product.quantity}
+                  </ProductPrice>
+                </PriceDetail>
+              </Product>
+            ))}
+
             <Hr />
-            <Product>
-              <ProductDetail>
-                <Image src="https://static.nike.com/a/images/t_prod_ls/w_1920,c_limit,f_auto/9114dec2-8e26-4747-afda-6a7cf0c77c97/air-jordan-4-white-and-black-dh6927-111-release-date.jpg" />
-                <Details>
-                  <ProductName>
-                    <b>Product:</b>AIR JORDAN 4 WHITE AND BLACK
-                  </ProductName>
-                  <ProductID>
-                    <b>ID:</b>98776554
-                  </ProductID>
-                  <ProductColor color="white" />
-                  <ProductSize>
-                    <b>Size:</b>EU42
-                  </ProductSize>
-                </Details>
-              </ProductDetail>
-              <PriceDetail>
-                <ProductAmountContainer>
-                  <Add />
-                  <ProductAmount>1</ProductAmount>
-                  <Remove />
-                </ProductAmountContainer>
-                <ProductPrice>$295</ProductPrice>
-              </PriceDetail>
-            </Product>
           </Info>
           <Summary>
             <SummaryTitle>ORDER SUMMARY</SummaryTitle>
             <SummaryItem>
               <SummaryItemText>SUBTOTAL</SummaryItemText>
-              <SummaryItemText>$484</SummaryItemText>
+              <SummaryItemText>${cart.total}</SummaryItemText>
             </SummaryItem>
             <SummaryItem>
               <SummaryItemText>Estimated Shipping</SummaryItemText>
@@ -219,9 +234,19 @@ const Cart = () => {
             </SummaryItem>
             <SummaryItem type="total">
               <SummaryItemText>Total</SummaryItemText>
-              <SummaryItemText>$484</SummaryItemText>
+              <SummaryItemText>${cart.total}</SummaryItemText>
             </SummaryItem>
-            <Button>CHECKOUT NOW</Button>
+            <StripeCheckout
+              name="ZX Shop"
+              billingAddress
+              shippingAddress
+              description={`Your total is $${cart.total}`}
+              amount={cart.total * 100}
+              token={onToken}
+              stripeKey={KEY}
+            >
+              <Button>CHECK OUT</Button>
+            </StripeCheckout>
           </Summary>
         </Bottom>
       </Wrapper>
