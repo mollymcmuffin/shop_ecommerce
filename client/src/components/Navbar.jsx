@@ -82,8 +82,12 @@ const Navbar = () => {
           <Logo>Z&X</Logo>
         </Center>
         <Right>
-          <MenuItem>REGISTER</MenuItem>
-          <MenuItem>SIGN IN</MenuItem>
+          <MenuItem>
+            <Link to={`/register`}>REGISTER</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link to={`/register`}>SIGN IN</Link>
+          </MenuItem>
           <Link to="/cart">
             <MenuItem>
               <Badge
