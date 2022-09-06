@@ -86,7 +86,7 @@ const Navbar = () => {
             <Link to={`/register`}>REGISTER</Link>
           </MenuItem>
           <MenuItem>
-            <Link to={`/register`}>SIGN IN</Link>
+            <Link to={`/login`}>SIGN IN</Link>
           </MenuItem>
           <Link to="/cart">
             <MenuItem>
